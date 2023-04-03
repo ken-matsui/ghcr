@@ -39,6 +39,20 @@ impl Image {
         Ok(())
     }
 
+    /// # Args
+    /// * upload_file: must be tar.gz'ed upload-target directory
+    /// * blobs: ./blobs/sha256
+    ///          https://github.com/opencontainers/image-spec/blob/main/image-layout.md#blobs
+    ///
+    /// # Description
+    /// 1. Get sha256 digest of compressed upload-target directory
+    /// 2. Copy the compressed upload-target directory to (as) ./blobs/sha256/{digest we got in (1)}
+    pub(crate) fn write_tar_gz(upload_file: &Path, blobs: &Path) -> Result<String> {
+        let tar_gz_sha256 = sha256::try_digest(upload_file)?;
+        fs::copy(upload_file, blobs.join(tar_gz_sha256.clone()))?;
+        Ok(tar_gz_sha256)
+    }
+
     pub(crate) fn write_image_config(
         &self,
         arch: &str,
@@ -60,19 +74,5 @@ impl Image {
             .validate_schema(IMAGE_CONFIG_SCHEMA_URI, &image_config)?;
         let (config_json_sha256, config_json_size) = Image::write_hash(blobs, &image_config, None)?;
         Ok((config_json_sha256, config_json_size as i64))
-    }
-
-    /// # Args
-    /// * upload_file: must be tar.gz'ed upload-target directory
-    /// * blobs: ./blobs/sha256
-    ///          https://github.com/opencontainers/image-spec/blob/main/image-layout.md#blobs
-    ///
-    /// # Description
-    /// 1. Get sha256 digest of compressed upload-target directory
-    /// 2. Copy the compressed upload-target directory to (as) ./blobs/sha256/{digest we got in (1)}
-    pub(crate) fn write_tar_gz(upload_file: &Path, blobs: &Path) -> Result<String> {
-        let tar_gz_sha256 = sha256::try_digest(upload_file)?;
-        fs::copy(upload_file, blobs.join(tar_gz_sha256.clone()))?;
-        Ok(tar_gz_sha256)
     }
 }
