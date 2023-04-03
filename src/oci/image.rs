@@ -1,4 +1,4 @@
-use crate::oci::schema::{Schema, IMAGE_LAYOUT_SCHEMA_URI};
+use crate::oci::schema::{Schema, IMAGE_CONFIG_SCHEMA_URI, IMAGE_LAYOUT_SCHEMA_URI};
 
 use std::fs;
 use std::path::Path;
@@ -37,6 +37,29 @@ impl Image {
             .validate_schema(IMAGE_LAYOUT_SCHEMA_URI, &image_layout)?;
         Image::write_hash(root, &image_layout, Some("oci-layout".to_string()))?;
         Ok(())
+    }
+
+    pub(crate) fn write_image_config(
+        &self,
+        arch: &str,
+        os: &str,
+        tar_sha256: &str,
+        blobs: &Path,
+    ) -> Result<(String, i64)> {
+        let image_config = json!({
+            "architecture": arch,
+            "os": os,
+            "rootfs": {
+                "type": "layers",
+                "diff_ids": [
+                    format!("sha256:{tar_sha256}")
+                ]
+            }
+        });
+        self.schema
+            .validate_schema(IMAGE_CONFIG_SCHEMA_URI, &image_config)?;
+        let (config_json_sha256, config_json_size) = Image::write_hash(blobs, &image_config, None)?;
+        Ok((config_json_sha256, config_json_size as i64))
     }
 
     /// # Args
