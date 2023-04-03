@@ -13,7 +13,7 @@ pub(crate) struct Image {
 fn write_hash(directory: &Path, hash: &Value, filename: Option<String>) -> Result<(String, usize)> {
     let json = serde_json::to_string_pretty(&hash)?;
     let json_sha256 = sha256::digest(json.clone());
-    let filename = filename.unwrap_or(sha256digest.clone());
+    let filename = filename.unwrap_or(json_sha256.clone());
     let path = directory.join(filename);
     fs::write(path, json.clone())?;
 
