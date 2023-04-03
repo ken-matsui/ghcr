@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
@@ -5,7 +6,8 @@ use anyhow::Result;
 use serde_json::{json, Value};
 
 use crate::oci::schema::{
-    Schema, IMAGE_CONFIG_SCHEMA_URI, IMAGE_LAYOUT_SCHEMA_URI, IMAGE_MANIFEST_SCHEMA_URI,
+    Schema, IMAGE_CONFIG_SCHEMA_URI, IMAGE_INDEX_SCHEMA_URI, IMAGE_LAYOUT_SCHEMA_URI,
+    IMAGE_MANIFEST_SCHEMA_URI,
 };
 
 pub(crate) struct Image {
@@ -85,5 +87,21 @@ impl Image {
         self.schema
             .validate_schema(IMAGE_MANIFEST_SCHEMA_URI, image_manifest)?;
         Image::write_hash(blobs, image_manifest, None)
+    }
+
+    pub(crate) fn write_image_index(
+        &self,
+        manifests: &Vec<Value>,
+        annotations: &HashMap<String, String>,
+        blobs: &Path,
+    ) -> Result<(String, usize)> {
+        let image_index = json!({
+            "schemaVersion": 2,
+            "manifests": manifests,
+            "annotations": annotations,
+        });
+        self.schema
+            .validate_schema(IMAGE_INDEX_SCHEMA_URI, &image_index)?;
+        Image::write_hash(blobs, &image_index, None)
     }
 }
