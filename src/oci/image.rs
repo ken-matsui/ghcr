@@ -39,7 +39,7 @@ impl Image {
         let image_layout = json!({ "imageLayoutVersion": "1.0.0" });
         self.schema
             .validate_schema(IMAGE_LAYOUT_SCHEMA_URI, &image_layout)?;
-        Image::write_hash(root, &image_layout, Some("oci-layout".to_string()))?;
+        Self::write_hash(root, &image_layout, Some("oci-layout".to_string()))?;
         Ok(())
     }
 
@@ -76,7 +76,7 @@ impl Image {
         });
         self.schema
             .validate_schema(IMAGE_CONFIG_SCHEMA_URI, &image_config)?;
-        Image::write_hash(blobs, &image_config, None)
+        Self::write_hash(blobs, &image_config, None)
     }
 
     pub(crate) fn write_image_manifest(
@@ -86,7 +86,7 @@ impl Image {
     ) -> Result<(String, usize)> {
         self.schema
             .validate_schema(IMAGE_MANIFEST_SCHEMA_URI, image_manifest)?;
-        Image::write_hash(blobs, image_manifest, None)
+        Self::write_hash(blobs, image_manifest, None)
     }
 
     pub(crate) fn write_image_index(
@@ -102,6 +102,28 @@ impl Image {
         });
         self.schema
             .validate_schema(IMAGE_INDEX_SCHEMA_URI, &image_index)?;
-        Image::write_hash(blobs, &image_index, None)
+        Self::write_hash(blobs, &image_index, None)
+    }
+
+    pub(crate) fn write_index_json(
+        &self,
+        index_json_sha256: &str,
+        index_json_size: usize,
+        root: &Path,
+        annotations: &HashMap<String, String>,
+    ) -> Result<()> {
+        let index_json = json!({
+            "schemaVersion": 2,
+            "manifests": [{
+                "mediaType": "application/vnd.oci.image.index.v1+json",
+                "digest": format!("sha256:{index_json_sha256}"),
+                "size": index_json_size,
+                "annotations": annotations,
+            }],
+        });
+        self.schema
+            .validate_schema(IMAGE_INDEX_SCHEMA_URI, &index_json)?;
+        Self::write_hash(root, &index_json, Some("index.json".to_string()))?;
+        Ok(())
     }
 }
