@@ -4,10 +4,11 @@ use anyhow::{bail, Context, Result};
 use serde_json::Value;
 use valico::json_schema;
 
-pub const IMAGE_CONFIG_SCHEMA_URI: &str = "https://opencontainers.org/schema/image/config";
-pub const IMAGE_INDEX_SCHEMA_URI: &str = "https://opencontainers.org/schema/image/index";
-pub const IMAGE_LAYOUT_SCHEMA_URI: &str = "https://opencontainers.org/schema/image/layout";
-pub const IMAGE_MANIFEST_SCHEMA_URI: &str = "https://opencontainers.org/schema/image/manifest";
+pub(crate) const IMAGE_CONFIG_SCHEMA_URI: &str = "https://opencontainers.org/schema/image/config";
+pub(crate) const IMAGE_INDEX_SCHEMA_URI: &str = "https://opencontainers.org/schema/image/index";
+pub(crate) const IMAGE_LAYOUT_SCHEMA_URI: &str = "https://opencontainers.org/schema/image/layout";
+pub(crate) const IMAGE_MANIFEST_SCHEMA_URI: &str =
+    "https://opencontainers.org/schema/image/manifest";
 
 pub(crate) struct Schema {
     pub(crate) schema_json: HashMap<&'static str, Value>,
