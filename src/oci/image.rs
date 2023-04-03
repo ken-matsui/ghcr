@@ -1,10 +1,12 @@
-use crate::oci::schema::{Schema, IMAGE_CONFIG_SCHEMA_URI, IMAGE_LAYOUT_SCHEMA_URI};
-
 use std::fs;
 use std::path::Path;
 
 use anyhow::Result;
 use serde_json::{json, Value};
+
+use crate::oci::schema::{
+    Schema, IMAGE_CONFIG_SCHEMA_URI, IMAGE_LAYOUT_SCHEMA_URI, IMAGE_MANIFEST_SCHEMA_URI,
+};
 
 pub(crate) struct Image {
     schema: Schema,
@@ -59,7 +61,7 @@ impl Image {
         os: &str,
         tar_sha256: &str,
         blobs: &Path,
-    ) -> Result<(String, i64)> {
+    ) -> Result<(String, usize)> {
         let image_config = json!({
             "architecture": arch,
             "os": os,
@@ -72,7 +74,16 @@ impl Image {
         });
         self.schema
             .validate_schema(IMAGE_CONFIG_SCHEMA_URI, &image_config)?;
-        let (config_json_sha256, config_json_size) = Image::write_hash(blobs, &image_config, None)?;
-        Ok((config_json_sha256, config_json_size as i64))
+        Image::write_hash(blobs, &image_config, None)
+    }
+
+    pub(crate) fn write_image_manifest(
+        &self,
+        image_manifest: &Value,
+        blobs: &Path,
+    ) -> Result<(String, usize)> {
+        self.schema
+            .validate_schema(IMAGE_MANIFEST_SCHEMA_URI, image_manifest)?;
+        Image::write_hash(blobs, image_manifest, None)
     }
 }
