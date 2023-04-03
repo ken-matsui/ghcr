@@ -14,3 +14,5 @@ valico = "3"
 const_format = { version = "0.2", features = ["fmt"] }
 which = "4.4.0"
 oci-spec = "0.6.0"
+flate2 = "1.0"
+tar = "0.4"
