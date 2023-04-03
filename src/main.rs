@@ -1,9 +1,9 @@
-// ref: https://github.com/Homebrew/brew/blob/aa894fbfcda17ffb0d14848b04d5c7af1f3e7efd/Library/Homebrew/github_packages.rb
-#![feature(const_mut_refs)]
+use anyhow::Result;
+use ghcr::Ghcr;
 
-mod ghcr;
-mod oci;
+fn main() -> Result<()> {
+    let ghcr = Ghcr::new("poac-dev".to_string(), "poac".to_string());
+    ghcr.upload_oci_image("ken-matsui/ghcr", "1.0.0")?;
 
-fn main() {
-    println!("Hello, world!");
+    Ok(())
 }
