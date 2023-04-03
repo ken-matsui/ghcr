@@ -13,3 +13,4 @@ sha256 = "1.1.2"
 valico = "3"
 const_format = { version = "0.2", features = ["fmt"] }
 which = "4.4.0"
+oci-spec = "0.6.0"
