@@ -31,13 +31,12 @@ impl Image {
         Ok((json_sha256, json.len()))
     }
 
-    pub(crate) fn write_image_layout(&self, root: &Path) -> Result<(String, i64)> {
+    pub(crate) fn write_image_layout(&self, root: &Path) -> Result<()> {
         let image_layout = json!({ "imageLayoutVersion": "1.0.0" });
         self.schema
             .validate_schema(IMAGE_LAYOUT_SCHEMA_URI, &image_layout)?;
-        let (config_json_sha256, config_json_size) =
-            Image::write_hash(root, &image_layout, Some("oci-layout".to_string()))?;
-        Ok((config_json_sha256, config_json_size as i64))
+        Image::write_hash(root, &image_layout, Some("oci-layout".to_string()))?;
+        Ok(())
     }
 
     /// # Args
