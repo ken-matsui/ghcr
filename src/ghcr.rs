@@ -94,46 +94,41 @@ impl Ghcr {
         let blobs = blobs_buf.as_path();
         fs::create_dir_all(blobs)?;
 
-        let mut package_annotations = HashMap::<String, String>::new();
-        package_annotations.insert(
-            "com.github.package.type".to_string(),
-            GITHUB_PACKAGE_TYPE.to_string(),
-        );
-        // package_annotations.insert("org.opencontainers.image.created".to_string(), created_date);
-        // package_annotations.insert(
-        //     "org.opencontainers.image.description".to_string(),
-        //     description,
-        // );
-        // package_annotations.insert(
-        //     "org.opencontainers.image.documentation".to_string(),
-        //     documentation,
-        // );
-        // package_annotations.insert(
-        //     "org.opencontainers.image.license".to_string(),
-        //     license,
-        // );
-        package_annotations.insert(
-            "org.opencontainers.image.ref.name".to_string(),
-            version.to_string(),
-        );
-        // package_annotations.insert(
-        //     "org.opencontainers.image.revision".to_string(),
-        //     git_revision,
-        // );
-        // package_annotations.insert("org.opencontainers.image.source".to_string(), source);
-        package_annotations.insert("org.opencontainers.image.title".to_string(), image_name);
-        // package_annotations.insert(
-        //     "org.opencontainers.image.url".to_string(),
-        //     homepage,
-        // );
-        package_annotations.insert(
-            "org.opencontainers.image.vendor".to_string(),
-            self.org.clone(),
-        );
-        package_annotations.insert(
-            "org.opencontainers.image.version".to_string(),
-            version.to_string(),
-        );
+        let package_annotations = HashMap::<String, String>::from([
+            (
+                "com.github.package.type".to_string(),
+                GITHUB_PACKAGE_TYPE.to_string(),
+            ),
+            // ("org.opencontainers.image.created".to_string(), created_date),
+            // (
+            //     "org.opencontainers.image.description".to_string(),
+            //     description,
+            // ),
+            // (
+            //     "org.opencontainers.image.documentation".to_string(),
+            //     documentation,
+            // ),
+            // ("org.opencontainers.image.license".to_string(), license),
+            (
+                "org.opencontainers.image.ref.name".to_string(),
+                version.to_string(),
+            ),
+            // (
+            //     "org.opencontainers.image.revision".to_string(),
+            //     git_revision,
+            // ),
+            // ("org.opencontainers.image.source".to_string(), source),
+            ("org.opencontainers.image.title".to_string(), image_name),
+            // ("org.opencontainers.image.url".to_string(), homepage),
+            (
+                "org.opencontainers.image.vendor".to_string(),
+                self.org.clone(),
+            ),
+            (
+                "org.opencontainers.image.version".to_string(),
+                version.to_string(),
+            ),
+        ]);
 
         dprintln!("Uploading {target_file:?}");
         let tar_gz_sha256 = oci::Image::write_tar_gz(target_file, blobs)?;
@@ -152,11 +147,10 @@ impl Ghcr {
         let (config_json_sha256, config_json_size) =
             oci_image.write_image_config(arch, os, &tar_sha256, blobs)?;
 
-        let mut descriptor_annotations = HashMap::<String, String>::new();
-        descriptor_annotations.insert(
+        let descriptor_annotations = HashMap::<String, String>::from([(
             "org.opencontainers.image.ref.name".to_string(),
             version.to_string(),
-        );
+        )]);
 
         let image_manifest = json!({
             "schemaVersion": 2,
